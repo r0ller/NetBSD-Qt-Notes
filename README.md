@@ -7,7 +7,7 @@ Contents:
 * Qt Android
 * Qt Creator
 
-# Installing Emscripten for Qt:
+# Installing Emscripten for Qt
 
 -install clang, llvm, lld (llvm linker) packages
 -see https://github.com/WebAssembly/binaryen#building
@@ -100,5 +100,98 @@ Contents:
 `vi qtbase/qmake/Makefile`
 
 -so qtlibraryinfo_final.o target looks like this:
-qlibraryinfo_final.o: $(SOURCE_PATH)/src/corelib/global/qlibraryinfo.cpp $(BUILD_PATH)/src/corelib/global/qconfig.cpp	$(CXX) -c -o $@ $(CXXFLAGS) $(SOURCE_PATH)/src/corelib/global/qlibraryinfo.cpp $<`
+qlibraryinfo_final.o: $(SOURCE_PATH)/src/corelib/global/qlibraryinfo.cpp $(BUILD_PATH)/src/corelib/global/qconfig.cpp	$(CXX) -c -o $@ $(CXXFLAGS) $(SOURCE_PATH)/src/corelib/global/qlibraryinfo.cpp $<
 
+# Installing Android for Qt
+
+-qt prerequisites: https://wiki.qt.io/Building_Qt_5_from_Git
+
+`git clone git://code.qt.io/qt/qt5.git`
+
+`cd qt5`
+
+`git checkout 5.15`
+
+`perl init-repository`
+
+-useful sites with additional info:
+
+https://doc.qt.io/qt-5/android.html
+
+https://doc.qt.io/qt-5/android-building.html
+
+https://doc.qt.io/qt-5/android-building.html#using-manual-installation
+
+-based on this latter page, try this:
+`./configure -xplatform android-clang --disable-rpath -nomake tests -nomake examples -android-ndk <path/to/sdk>/ndk-bundle/ -android-sdk <path/to/sdk> -no-warnings-are-errors -android-abis arm64-v8a`
+
+-when first tried I had to change this but when tried later I did not need the next two lines so I think they can be skipped:
+-used an uname symlink to an uname.sh in /h0me/r0ller/bin to mock Linux system info
+-in qtbase/mkspecs/linux-g++/qplatformdefs.h replace: #include <features.h> with #include "/usr/include/g++/parallel/features.h"
+
+-search for "not supported by Android" in qtbase/configure.pri and paste the lines relevant for Linux host in the appropriate condition in the if branch of that else section.
+-gmake
+-according to configure, 'gmake install' is a must but as I did not set any prefix, by default it will install to /usr/local so that needs to be created as root before gmake install. I cloned my qt source in the Android folder hoping that no install will be required in the end, so that turned out to be a mistake. Conclusion: SET A PREFIX
+-set: ln -s /usr/pkg/bin/bash /bin/bash
+
+-Configuring qt kit for android is pretty difficult and I only managed to get it work for NDK but the next steps describe what I tried.
+-set the compiler used for compiling qt for android e.g.:
+/home/r0ller/Android/Sdk/ndk-bundle/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++
+
+-pages used for the configuration:
+
+https://doc.qt.io/qt-5/android-getting-started.html
+
+https://doc.qt.io/qtcreator/creator-developing-android.html#specifying-android-device-settings
+
+-as qt for Android requires a specific NDK version, you need to get the different components somehow for which I used this page:
+https://androidsdkoffline.blogspot.com/p/android-sdk-10-api-29-q-direct-download.html
+
+-essential packages listed by creator:
+"build-tools;29.0.2" "ndk;21.1.6352462" "platform-tools" "platforms;android-29" "cmdline-tools;latest"
+
+
+-setting up via sdkmanager:
+`export JAVA_HOME=/usr/pkg/java/openjdk8` //openjdk11 won't work!
+
+-start sdkmanager in Android/Sdk/tools/bin, issue from any location: `sdkmanager --sdk_root=/home/r0ller/Android/Sdk --version`
+
+-copy the specified android-ndk-r21b directory CONTENT, after unzipping it must be copied into the install directory which shall look like: /home/r0ller/Android/Sdk/ndk-bundle/
+
+-android app build issues: type_traits.h not found
+-set in the corresponding files <type_traits> to "llvm/Support/type_traits.h" and add INCLUDEPATH += /usr/pkg/include in project .pro file
+
+-additional info: https://wiki.qt.io/Android
+
+-may worth a try: set INCLUDEPATH if qt creator complains about the arm compiler manually set and wants the qmake compilere: /home/r0ller/Android/qt5/qtbase/mkspecs/android-clang
+
+-set ANDROID_NDK_ROOT to your NDK root
+-could not read qmake configuration file so I had to set it manually: /home/r0ller/Android/qt5-install/mkspecs/android-clang/qmake.conf
+
+-used this as inspiration but no clue for what:
+https://stackoverflow.com/questions/28684647/developing-a-qt-app-for-android-from-the-command-line/28692281
+
+-openssl had to be installed, adding openssl libs to project still needs to be done -> not at all, api >=21 does not need openssl
+
+-compiling from creator does not work maybe due to qt version seen erroneous by creator and seems that wrong qmake is picked
+-BUT: if the command copied from effective qmake call (found on project build page) is issued in the debug-build directory (e.g. /home/r0ller/TW/gettere3/build-debug-Android/) produces the arm libs (after getting rid of system bin dirs in PATH):
+
+`~/Android/qt5-install/bin/qmake ~/TW/getttere3/getttere3/getttere3.pro -spec /home/r0ller/Android/qt5-install/mkspecs/android-clang CONFIG+=debug && /home/r0ller/Android/Sdk/ndk-bundle/prebuilt/linux-x86_64/bin/make`
+
+-create the directory defined in .pro for ANDROID_PACKAGE_SOURCE_DIR in the project directory (not the build directory) otherwise make apk will fail with "cannot find android sources"
+
+-Another approach to build an android app is as follows:
+-Set ENVIRONMENT VARIABLES like JAVA_HOME, add java path to PATH, ANDROID_SDK_ROOT, ANDROID_NDK_ROOT, etc. see: https://doc.qt.io/qt-5/deployment-android.html
+`make apk`
+
+-it generated androiddeployqt like this is in the Makefile at the apk target: ~/Android/qt5-install/bin/androiddeployqt --input android-gettere3-deployment-settings.json --output /home/r0ller/TW/getttere3/build-getttere3-Android-Debug --android-platform android-29 --gradle
+
+-gradle will fail due to unknown platform: netbsd error
+-cd to the android-build directory within the project build directory and execute: gradlew tasks --stacktrace
+-see for additional info: https://android.googlesource.com/platform/tools/base/+/studio-master-dev/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/res/Aapt2MavenUtils.kt
+
+-other pages about deployment:
+
+https://doc.qt.io/qt-5/deployment-android.html
+
+https://doc.qt.io/qtcreator/creator-deploying-android.html
