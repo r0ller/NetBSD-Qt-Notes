@@ -6,6 +6,7 @@ Contents:
 * Qt Emscripten
 * Qt Android
 * Qt Creator
+* Current state
 
 # Installing Emscripten for Qt
 
@@ -195,3 +196,72 @@ https://stackoverflow.com/questions/28684647/developing-a-qt-app-for-android-fro
 https://doc.qt.io/qt-5/deployment-android.html
 
 https://doc.qt.io/qtcreator/creator-deploying-android.html
+
+# Installing Qt Creator
+
+-I installed Qt Creator from git current so my version is 4.14.0-beta1 (4.13.82)
+
+-the steps I followed are described here: https://wiki.qt.io/Building_Qt_Creator_from_Git
+
+`git clone --recursive https://code.qt.io/qt-creator/qt-creator.git`
+
+`export LLVM_INSTALL_DIR=/path/to/llvm (/usr/pkg without /bin)`
+
+`mkdir qt-creator-build`
+
+`cd qt-creator-build`
+
+`qmake ../qt-creator/qtcreator.pro`
+
+`gmake qmake_all`
+
+`gmake -j<number-of-cpu-cores+1>`
+
+-there are some changes I hadd to apply which are listed below:
+-this page gave the hint to set fno-rtti: http://clang-developers.42468.n3.nabble.com/undefined-reference-to-typeinfo-for-clang-ASTFrontendAction-td1848336.html
+
+-this page gave the hint to set the following variable: https://bugreports.qt.io/browse/QTCREATORBUG-17876?focusedCommentId=351818&page=com.atlassian.jira.plugin.system.issuetabpanels%3Acomment-tabpanel
+QTC_NO_CLANG_LIBTOOLING=true
+
+-finally, I set the -fno-rtti in the qtcreator.pro file according to this page: https://doc.qt.io/qt-5/qmake-variable-reference.html
+CONFIG+=rtti_off
+
+-set in qt-creator/src/src.pro:
+QTC_NO_CLANG_LIBTOOLING = true
+
+-set in qt-creator/src/tools/clangrefactoringbackend/clangrefactoringbackend.pro:
+QMAKE_CXXFLAGS += -fno-rtti
+(added after first QMAKE_CXXFLAGS)
+
+-set in qt-creator/src/tools/clangpchmanagerbackend/clangpchmanagerbackend.pro:
+QMAKE_CXXFLAGS += -fno-rtti
+(added after first QMAKE_CXXFLAGS)
+
+-if gmake stops, just restart it. it needs several turns to compile, mostly plugin builds fail
+
+-LD_LIBRARY_PATH needs to be set if you don't install qtcreator
+-I got an error on starting qtcreator(.sh) when I built qt5 myself but not when qt5 was installed via pkgin:
+qt.qpa.plugin: Could not find the Qt platform plugin "xcb" in ""
+reason: libqxcb.so is missing from /usr/pkg/plugins/platforms
+
+-for all build steps I used gmake
+
+-in case you want to install qt creator (probably gmake goes here as well):
+`make install INSTALL_ROOT=$INSTALL_DIRECTORY`
+
+-configuring kits in Qt creator to build android or emscripten targets is pretty difficult and I mostly managed to get some partial results by try and error so I have no specific notes on that. However, for emscripten there is a specific flag in qt creator settings that needs to be checked and I guess I found that described here at the Enabling the Webassembly plugin section: https://doc.qt.io/qtcreator/creator-setup-webassembly.html
+
+# Current state
+
+-Native: everything I tried (both QtWidgets and QML) works fine except debugging but I have not even tried configuring it for the Qt Creator.
+
+-Android: as mentioned eralier I cannot build an android app from qt creator as it seems Qt Creator does not pick the correct qmake but when I copy the effective qmake call and issue it on the command line then I get a successful build of the libraries. Unfortunately, I have not yet succeeded in building an apk of them.
+
+-Emscripten: everything what I built as native could be built by emscripten as well.
+
+-After getting tired of building an Android apk I decided to try to use an emscripten build of a QML UI with a native C++ backend on Android. Finally, I sketched a crossplatform architecture for Android, Node JS/Browser and native use cases. You can find a post about it on the Qt forum and the repo here:
+
+https://forum.qt.io/topic/121354/crossplatform-desktop-android-browser-nodejs-architecture-sketch
+
+https://github.com/r0ller/qwa
+
