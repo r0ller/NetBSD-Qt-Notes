@@ -104,8 +104,8 @@ Contents:
 -modify the corresponding makefile:
 `vi qtbase/qmake/Makefile`
 
--so qtlibraryinfo_final.o target looks like this:
-qlibraryinfo_final.o: $(SOURCE_PATH)/src/corelib/global/qlibraryinfo.cpp $(BUILD_PATH)/src/corelib/global/qconfig.cpp	$(CXX) -c -o $@ $(CXXFLAGS) $(SOURCE_PATH)/src/corelib/global/qlibraryinfo.cpp $<
+-so qtlibraryinfo_final.o target looks like this:  
+`qlibraryinfo_final.o: $(SOURCE_PATH)/src/corelib/global/qlibraryinfo.cpp $(BUILD_PATH)/src/corelib/global/qconfig.cpp	$(CXX) -c -o $@ $(CXXFLAGS) $(SOURCE_PATH)/src/corelib/global/qlibraryinfo.cpp $<`
 
 # Installing Android for Qt
 
