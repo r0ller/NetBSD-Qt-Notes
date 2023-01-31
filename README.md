@@ -56,7 +56,7 @@ Contents:
 
 -for some additional info see: https://wiki.qt.io/Qt_for_WebAssembly
 
--edit emsdk.py and change the check for the system to set LINUX to true if os is NetBSD: `if not MACOS and (platform.system() == 'NetBSD')`
+-edit emsdk.py and change the check for the LINUX system (to set a variable called LINUX to true) to let NetBSD pass the condition: `if not MACOS and (platform.system() == 'NetBSD')`
 
 -Install the specified version listed for qt-5.15:
 `./emsdk install 1.39.8`
@@ -127,6 +127,7 @@ Contents:
 
 -in Tools/Options/Kits/Kits add a kit for the wasm Qt selecting the WebAssembly runtime as device type and specifying the custom emcc/em++ compilers for the wasm Qt version configured previously
 
+-Create an empty Qt Quick project and build it (you may need to specify in the build step after qmake that QTC should use /usr/bin/make). It'll take long as emscripten compiles libc.a for the first time besides the project. Load the generated html in a browser. In case of chrome and firefox you'll get a CORS error which can be fixed (in firefox at least) by setting security.fileuri.strict_origin_policy to false in about:config.
 
 # Installing Android for Qt
 
