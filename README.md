@@ -10,15 +10,19 @@ Contents:
 
 # Installing Emscripten for Qt
 
--install clang, llvm, lld (llvm linker) packages via pkgin
+-install clang, llvm, lld (llvm linker), nodejs, npm packages, python3, perl via pkgin
 
 -see https://github.com/WebAssembly/binaryen#building
 
 `git clone https://github.com/WebAssembly/binaryen.git`
 
-`git checkout version_91`
+`git checkout version_90`
 
-`cmake . && make`
+`cmake .`
+
+-Edit the generated config.h so that BINARYEN_VERSION_INFO has no underscore as in "version_90" but "version 90".
+
+`make`
 
 -build fastcomp: https://emscripten.org/docs/building_from_source/building_fastcomp_manually_from_source.html
 `mkdir fastcomp`
@@ -52,10 +56,14 @@ Contents:
 
 -for some additional info see: https://wiki.qt.io/Qt_for_WebAssembly
 
+-edit emsdk.py and change the check for the system to set LINUX to true if os is NetBSD: `if not MACOS and (platform.system() == 'NetBSD')`
+
 -Install the specified version listed for qt-5.15:
 `./emsdk install 1.39.8`
 
 `./emsdk activate 1.39.8`
+
+-usually a linux specific nodejs gets installed as well in the node directory, so set a symlink to the native node binary and also replace the linux binaries in emsdk/updtream/bin to their native counterparts but as a bare minimum you must do it for wasm-ld. No clue why setting (see later) LLVM_ROOT is not enough to override looking up the binaries in there but that's how it seems to work.
 
 -WARNING: 'source emsdk/emsdk_env.sh' does NOT set the envvars correctly
 
@@ -97,7 +105,7 @@ Contents:
 `make module-qtbase`
 
 -or along with others like:
-`make module-qtbase module-qtdeclarative`
+`make module-qtbase module-qtdeclarative module-qtquickcontrols2`
 
 -if it gets stuck at qtlibraryinfo_final.o it can be fixed according to this hint: https://git.sailfishos.org/mer-core/qtbase/commit/52d64fca662d0e488801fc40dffdc0a732cfdbd5
 
@@ -106,6 +114,19 @@ Contents:
 
 -so qtlibraryinfo_final.o target looks like this:  
 `qlibraryinfo_final.o: $(SOURCE_PATH)/src/corelib/global/qlibraryinfo.cpp $(BUILD_PATH)/src/corelib/global/qconfig.cpp	$(CXX) -c -o $@ $(CXXFLAGS) $(SOURCE_PATH)/src/corelib/global/qlibraryinfo.cpp $<`
+
+# Set up WebAssembly as target in Qt Creator
+
+-set webassembly option: Help/About Plugins/Device Support
+
+-set Emscripten SDK path in Tools/Options/Devices/WebAssembly
+
+-in Tools/Options/Kits/Compilers set up a custom (using Add/Custom instead of Add/Emscripten) C/C++ compiler for emcc/em++ for the target: asmjs-unknown-unknown-emscripten-32bit with error parser Clang
+
+-in Tools/Options/Kits/Qt Versions add the wasm compiled Qt qmake binary to configure a Qt Version
+
+-in Tools/Options/Kits/Kits add a kit for the wasm Qt selecting the WebAssembly runtime as device type and specifying the custom emcc/em++ compilers for the wasm Qt version configured previously
+
 
 # Installing Android for Qt
 
