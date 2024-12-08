@@ -12,7 +12,7 @@ Contents:
 
 # Installing Emscripten for Qt
 
--install clang, binaryen, llvm, lld (llvm linker), nodejs, npm packages, python3, perl via pkgin
+-install clang, binaryen, llvm, lld (llvm linker), nodejs, npm packages, python3, perl, qt6 (having the same version of qt source for wasm and the installed native is important) via pkgin
 
 -download and install emsdk: https://emscripten.org/docs/getting_started/downloads.html
 
@@ -29,7 +29,7 @@ Contents:
 
 `./emsdk activate 3.1.50`
 
--usually a linux specific nodejs gets installed as well in the node directory and the prebuilt binaries are for linux in emsdk/upstream/bin, so rename it to emsdk/upstream/o_bin and set a symlink to the native node binaries in /usr/pkg/bin as emsdk/upstream/bin. No clue why setting (see later) LLVM_ROOT is not enough to override looking up the binaries in there but that's how it seems to work.
+-usually a linux specific nodejs gets installed as well in the node directory and the prebuilt binaries are for linux in emsdk/upstream/bin, so rename the prebuilt bin directory to emsdk/upstream/o_bin and set a symlink to the native node binaries in /usr/pkg/bin as emsdk/upstream/bin and also rename emsdk/node/20.18.0_64bit/bin to /usr/pkg/bin. No clue why setting (see later) LLVM_ROOT and NODE_JS are not enough to override looking up the binaries in there but that's how it seems to work.
 
 -WARNING: 'source emsdk/emsdk_env.sh' does NOT set the envvars correctly
 
@@ -48,6 +48,8 @@ Contents:
 
 `export JS_ENGINES=[$NODE_JS]`
 
+`export EMSDK=/home/r0ller/emsdk-3.1.50`
+
 -to see if it works fine run:
 `emcc -v`
 
@@ -63,14 +65,14 @@ Contents:
 
 `perl init-repository`
 
--NOTE: set emscripten envvars, then:
+-NOTE: set emscripten envvars, (and here it turns out that having the same version of qt source and the installed native is important) then:
 
-`./configure -xplatform wasm-emscripten -nomake examples -prefix $PWD/qtbase`
+`./configure -qt-host-path /usr/pkg/qt6 -xplatform wasm-emscripten -nomake examples -prefix $PWD/qtbase`
 
 -once finished, build required modules:
 `make module-qtbase`
 
--or along with others like:
+-names of other supported modules (https://doc.qt.io/qt-6/wasm.html#supported-qt-modules) can be found here (https://wiki.qt.io/Qt_for_WebAssembly) and can be built in parallel like:
 `make module-qtbase module-qtdeclarative module-qtquickcontrols2`
 
 -if it gets stuck at qtlibraryinfo_final.o it can be fixed according to this hint: https://git.sailfishos.org/mer-core/qtbase/commit/52d64fca662d0e488801fc40dffdc0a732cfdbd5
