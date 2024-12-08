@@ -70,10 +70,10 @@ Contents:
 `./configure -qt-host-path /usr/pkg/qt6 -xplatform wasm-emscripten -nomake examples -prefix $PWD/qtbase`
 
 -once finished, build required modules:
-`make module-qtbase`
+`cmake --build . -t qtbase`
 
 -names of other supported modules (https://doc.qt.io/qt-6/wasm.html#supported-qt-modules) can be found here (https://wiki.qt.io/Qt_for_WebAssembly) and can be built in parallel like:
-`make module-qtbase module-qtdeclarative module-qtquickcontrols2`
+`cmake --build . -t qtbase -t qtdeclarative -t qtquickcontrols2`
 
 -if it gets stuck at qtlibraryinfo_final.o it can be fixed according to this hint: https://git.sailfishos.org/mer-core/qtbase/commit/52d64fca662d0e488801fc40dffdc0a732cfdbd5
 
