@@ -1,6 +1,7 @@
 # NetBSD-Qt-Notes
 
-Qt5 (5.15) packages can simply be installed on NetBSD via the package manager (pkgin) but other platform specific installations need to be installed manually. These are my notes on what I achieved and a cheatsheet for myself. I'll try to improve it to make a guide of this page. Feel free to share your experience to make this description better.
+Note: rewriting in progress to qt-6.7.2
+Qt6 (6.7.2) packages can simply be installed on NetBSD via the package manager (pkgin) but other platform specific installations need to be installed manually. These are my notes on what I achieved and a cheatsheet for myself. I'll try to improve it to make a guide of this page. Feel free to share your experience to make this description better.
 
 Contents:
 * Qt Emscripten
@@ -10,60 +11,24 @@ Contents:
 
 # Installing Emscripten for Qt
 
--install clang, llvm, lld (llvm linker), nodejs, npm packages, python3, perl via pkgin
+-install clang, binaryen, llvm, lld (llvm linker), nodejs, npm packages, python3, perl via pkgin
 
--see https://github.com/WebAssembly/binaryen#building
-
-`git clone https://github.com/WebAssembly/binaryen.git`
-
-`git checkout version_90`
-
-`cmake .`
-
--Edit the generated config.h so that BINARYEN_VERSION_INFO has no underscore as in "version_90" but "version 90".
-
-`make`
-
--build fastcomp: https://emscripten.org/docs/building_from_source/building_fastcomp_manually_from_source.html
-`mkdir fastcomp`
-
-`cd fastcomp`
-
-`git clone https://github.com/emscripten-core/emscripten-fastcomp`
-
-`cd emscripten-fastcomp`
-
-`git clone https://github.com/emscripten-core/emscripten-fastcomp-clang tools/clang`
-
--NOTE: You must clone it into a directory named clang as shown, so that Clang is present in tools/clang!
-
-`mkdir build`
-
-`cd build`
-
-`cmake .. -DCMAKE_BUILD_TYPE=Release -DLLVM_TARGETS_TO_BUILD="host;JSBackend" -DLLVM_INCLUDE_EXAMPLES=OFF -DLLVM_INCLUDE_TESTS=OFF -DCLANG_INCLUDE_TESTS=OFF`
-
--Call make to build the sources, specifying the number of available cores:
-`make -j1`
-
--Next thing is to download and install emsdk: https://emscripten.org/docs/getting_started/downloads.html
+-download and install emsdk: https://emscripten.org/docs/getting_started/downloads.html
 
 `git clone https://github.com/emscripten-core/emsdk.git`
 
 `cd emsdk`
 
--installing qt wasm according to: https://doc.qt.io/qt-5/wasm.html
-
--for some additional info see: https://wiki.qt.io/Qt_for_WebAssembly
+-installing qt wasm according to: https://doc.qt.io/qt-6/wasm.html
 
 -edit emsdk.py and change the check for the LINUX system (to set a variable called LINUX to true) to let NetBSD pass the condition: `if not MACOS and (platform.system() == 'NetBSD')`
 
--Install the specified version listed for qt-5.15:
-`./emsdk install 1.39.8`
+-Install the specified version listed for qt-6.7:
+`./emsdk install 3.1.50`
 
-`./emsdk activate 1.39.8`
+`./emsdk activate 3.1.50`
 
--usually a linux specific nodejs gets installed as well in the node directory, so set a symlink to the native node binary and also replace the linux binaries in emsdk/updtream/bin to their native counterparts but as a bare minimum you must do it for wasm-ld. No clue why setting (see later) LLVM_ROOT is not enough to override looking up the binaries in there but that's how it seems to work.
+-usually a linux specific nodejs gets installed as well in the node directory and the prebuilt binaries are for linux in emsdk/upstream/bin, so rename it to emsdk/upstream/o_bin and set a symlink to the native node binaries in /usr/pkg/bin as emsdk/upstream/bin. No clue why setting (see later) LLVM_ROOT is not enough to override looking up the binaries in there but that's how it seems to work.
 
 -WARNING: 'source emsdk/emsdk_env.sh' does NOT set the envvars correctly
 
@@ -87,13 +52,13 @@ Contents:
 
 -Later this file shall replace ~/.emscripten and emsdk/.emscripten without the export commands and apostrophing the values like: NODE_JS='node'
 
--when it comes to downloading the qt5 source: https://wiki.qt.io/Building_Qt_5_from_Git#Getting_the_source_code
+-when it comes to downloading the qt6 source (don't worry about cloning qt5 in the next step, qt itself mentions this strange stuff): https://wiki.qt.io/Building_Qt_6_from_Git
 
-`git clone git://code.qt.io/qt/qt5.git`
+`git clone git://code.qt.io/qt/qt5.git qt6`
 
-`cd qt5`
+`cd qt6`
 
-`git checkout 5.15`
+`git switch 6.7.2`
 
 `perl init-repository`
 
