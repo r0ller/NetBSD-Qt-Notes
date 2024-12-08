@@ -1,6 +1,7 @@
 # NetBSD-Qt-Notes
 
 Note: rewriting in progress to qt-6.7.2
+
 Qt6 (6.7.2) packages can simply be installed on NetBSD via the package manager (pkgin) but other platform specific installations need to be installed manually. These are my notes on what I achieved and a cheatsheet for myself. I'll try to improve it to make a guide of this page. Feel free to share your experience to make this description better.
 
 Contents:
