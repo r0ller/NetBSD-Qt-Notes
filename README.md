@@ -72,16 +72,8 @@ Contents:
 -once finished, build required modules:
 `cmake --build . -t qtbase`
 
--names of other supported modules (https://doc.qt.io/qt-6/wasm.html#supported-qt-modules) can be found here (https://wiki.qt.io/Qt_for_WebAssembly) and can be built in parallel like:
-`cmake --build . -t qtbase -t qtdeclarative -t qtquickcontrols2`
-
--if it gets stuck at qtlibraryinfo_final.o it can be fixed according to this hint: https://git.sailfishos.org/mer-core/qtbase/commit/52d64fca662d0e488801fc40dffdc0a732cfdbd5
-
--modify the corresponding makefile:
-`vi qtbase/qmake/Makefile`
-
--so qtlibraryinfo_final.o target looks like this:  
-`qlibraryinfo_final.o: $(SOURCE_PATH)/src/corelib/global/qlibraryinfo.cpp $(BUILD_PATH)/src/corelib/global/qconfig.cpp	$(CXX) -c -o $@ $(CXXFLAGS) $(SOURCE_PATH)/src/corelib/global/qlibraryinfo.cpp $<`
+-names of other supported modules (https://doc.qt.io/qt-6/wasm.html#supported-qt-modules) can be found in the qt6 install dir (qtquickcontrols2 got moved inside qtdeclarative) and can be built in parallel like:
+`cmake --build . -t qtbase -t qtdeclarative`
 
 # Set up WebAssembly as target in Qt Creator
 
