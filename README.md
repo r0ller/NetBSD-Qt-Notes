@@ -29,7 +29,7 @@ Contents:
 
 `./emsdk activate 3.1.50`
 
--usually a linux specific nodejs gets installed as well in the node directory and the prebuilt binaries are for linux in emsdk/upstream/bin, so rename the prebuilt bin directory to emsdk/upstream/o_bin and set a symlink to the native node binaries in /usr/pkg/bin as emsdk/upstream/bin and also rename emsdk/node/20.18.0_64bit/bin to /usr/pkg/bin. No clue why setting (see later) LLVM_ROOT and NODE_JS are not enough to override looking up the binaries in there but that's how it seems to work.
+-usually a linux specific nodejs gets installed as well in the node directory and the prebuilt binaries are for linux in emsdk/upstream/bin, so rename the prebuilt bin directory to emsdk/upstream/o_bin and set a symlink to the native node binaries in /usr/pkg/bin as emsdk/upstream/bin and also rename emsdk/node/20.18.0_64bit/bin and set a symlink to /usr/pkg/bin. No clue why setting (see later) LLVM_ROOT and NODE_JS are not enough to override looking up the binaries in there but that's how it seems to work.
 
 -WARNING: 'source emsdk/emsdk_env.sh' does NOT set the envvars correctly
 
